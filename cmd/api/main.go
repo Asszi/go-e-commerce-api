@@ -1,8 +1,31 @@
 package main
 
-import "fmt"
+import (
+	"github.com/asszi/go-e-commerce-api/internal/config"
+	"github.com/asszi/go-e-commerce-api/internal/database"
+	"github.com/asszi/go-e-commerce-api/internal/logger"
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
+	log := logger.New()
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to load config!")
+	}
 
-	fmt.Println("Hello, World!")
+	db, err := database.New(cfg.Database)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to connect to the database!")
+	}
+
+	mainDB, err := db.DB()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to get database connection!")
+	}
+
+	defer mainDB.Close()
+	gin.SetMode(cfg.Server.GinMode)
+
+	log.Info().Msg("Starting server...")
 }
