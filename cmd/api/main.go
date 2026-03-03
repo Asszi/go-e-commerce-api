@@ -1,9 +1,19 @@
 package main
 
 import (
+	"context"
+	"errors"
+	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/asszi/go-e-commerce-api/internal/config"
 	"github.com/asszi/go-e-commerce-api/internal/database"
 	"github.com/asszi/go-e-commerce-api/internal/logger"
+	"github.com/asszi/go-e-commerce-api/internal/server"
 	"github.com/gin-gonic/gin"
 )
 
@@ -11,21 +21,49 @@ func main() {
 	log := logger.New()
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to load config!")
+		log.Fatal().Err(err).Msg("failed to load config")
 	}
 
 	db, err := database.New(&cfg.Database)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to connect to the database!")
+		log.Fatal().Err(err).Msg("failed to connect to the database")
 	}
 
 	mainDB, err := db.DB()
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to get database connection!")
+		log.Fatal().Err(err).Msg("failed to get database connection")
 	}
 
 	defer mainDB.Close()
 	gin.SetMode(cfg.Server.GinMode)
 
-	log.Info().Msg("Starting server...")
+	srv := server.New(cfg, db, log)
+
+	router := srv.SetupRoutes()
+
+	httpServer := &http.Server{
+		Addr:         fmt.Sprintf(":%s", cfg.Server.Port),
+		Handler:      router,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	go func() {
+		log.Info().Str("port", cfg.Server.Port).Msg("starting http server")
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal().Err(err).Msg("failed to start http server")
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	log.Info().Msg("shutting down server")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := httpServer.Shutdown(ctx); err != nil {
+		log.Fatal().Err(err).Msg("failed to shutdown http server")
+	}
 }
