@@ -1,3 +1,5 @@
+version: "2"
+
 run:
   timeout: 5m
   modules-download-mode: readonly
@@ -5,19 +7,20 @@ run:
 linters:
   enable:
     - errcheck
-    - gosimple
     - govet
     - ineffassign
     - staticcheck
-    - typecheck
     - unused
-    - gofmt
-    - goimports
     - misspell
     - gocritic
     - revive
 
-linter-settings:
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+linters-settings:
   errcheck:
     check-type-assertions: true
 
@@ -29,6 +32,6 @@ linter-settings:
       - performance
       - style
 
-    revive:
-      rules:
-        - name: exported
+  revive:
+    rules:
+      - name: exported
