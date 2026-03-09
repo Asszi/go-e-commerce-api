@@ -20,7 +20,7 @@ func New(cfg *config.DatabaseConfig) (*gorm.DB, error) {
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("Failed to connect to the database: %w", err)
+		return nil, fmt.Errorf("failed to connect to the database: %w", err)
 	}
 
 	return db, err
