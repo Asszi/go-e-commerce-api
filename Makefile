@@ -5,7 +5,7 @@ help:
 	@echo " make build          - Builds the application"
 	@echo " make run            - Run the application"
 	@echo " make dev            - Run the application in development mode"
-	@echo " make format			- Format the code and re-arrange imports"
+	@echo " make format         - Format the code and re-arrange imports"
 	@echo " make lint           - Run linter on the codebase"
 	@echo " make migrate-up     - Apply database migrations"
 	@echo " make migrate-down   - Rollback database migrations"
