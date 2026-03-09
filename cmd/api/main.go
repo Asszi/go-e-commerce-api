@@ -37,7 +37,7 @@ func main() {
 	defer mainDB.Close()
 	gin.SetMode(cfg.Server.GinMode)
 
-	srv := server.New(cfg, db, log)
+	srv := server.New(cfg, db, &log)
 
 	router := srv.SetupRoutes()
 
@@ -64,6 +64,7 @@ func main() {
 	defer cancel()
 
 	if err := httpServer.Shutdown(ctx); err != nil {
-		log.Fatal().Err(err).Msg("failed to shutdown http server")
+		log.Error().Err(err).Msg("failed to shutdown http server")
+		return
 	}
 }
