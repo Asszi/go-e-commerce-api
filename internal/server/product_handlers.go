@@ -12,7 +12,7 @@ import (
 func (s *Server) createCategory(c *gin.Context) {
 	var req dto.CreateCategoryRequest
 	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
-		utils.BadRequestResponse(c, "invalid request data")
+		utils.BadRequestResponse(c, "invalid request data", err)
 	}
 
 	productService := services.NewProductService(s.db)
