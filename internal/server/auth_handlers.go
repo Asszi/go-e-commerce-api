@@ -2,7 +2,6 @@ package server
 
 import (
 	"github.com/asszi/go-e-commerce-api/internal/dto"
-	"github.com/asszi/go-e-commerce-api/internal/services"
 	"github.com/asszi/go-e-commerce-api/internal/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -15,8 +14,7 @@ func (s *Server) register(c *gin.Context) {
 		return
 	}
 
-	authService := services.NewAuthService(s.db, s.config)
-	response, err := authService.Register(&req)
+	response, err := s.authService.Register(&req)
 	if err != nil {
 		utils.BadRequestResponse(c, "registration failed", err)
 
@@ -34,8 +32,7 @@ func (s *Server) login(c *gin.Context) {
 		return
 	}
 
-	authService := services.NewAuthService(s.db, s.config)
-	response, err := authService.Login(&req)
+	response, err := s.authService.Login(&req)
 	if err != nil {
 		utils.UnauthorizedResponse(c, "login failed")
 
@@ -53,8 +50,7 @@ func (s *Server) refreshToken(c *gin.Context) {
 		return
 	}
 
-	authService := services.NewAuthService(s.db, s.config)
-	response, err := authService.RefreshToken(&req)
+	response, err := s.authService.RefreshToken(&req)
 	if err != nil {
 		utils.UnauthorizedResponse(c, "token refresh failed")
 
@@ -72,8 +68,7 @@ func (s *Server) logout(c *gin.Context) {
 		return
 	}
 
-	authService := services.NewAuthService(s.db, s.config)
-	if err := authService.Logout(req.RefreshToken); err != nil {
+	if err := s.authService.Logout(req.RefreshToken); err != nil {
 		utils.InternalServerErrorResponse(c, "logout failed", err)
 
 		return

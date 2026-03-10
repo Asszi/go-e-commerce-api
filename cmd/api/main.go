@@ -14,6 +14,7 @@ import (
 	"github.com/asszi/go-e-commerce-api/internal/database"
 	"github.com/asszi/go-e-commerce-api/internal/logger"
 	"github.com/asszi/go-e-commerce-api/internal/server"
+	"github.com/asszi/go-e-commerce-api/internal/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,7 +38,11 @@ func main() {
 	defer mainDB.Close()
 	gin.SetMode(cfg.Server.GinMode)
 
-	srv := server.New(cfg, db, &log)
+	authService := services.NewAuthService(db, cfg)
+	productService := services.NewProductService(db)
+	userService := services.NewUserService(db)
+
+	srv := server.New(cfg, db, &log, authService, productService, userService)
 
 	router := srv.SetupRoutes()
 
