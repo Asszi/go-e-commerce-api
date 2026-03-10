@@ -13,6 +13,7 @@ import (
 	"github.com/asszi/go-e-commerce-api/internal/config"
 	"github.com/asszi/go-e-commerce-api/internal/database"
 	"github.com/asszi/go-e-commerce-api/internal/logger"
+	"github.com/asszi/go-e-commerce-api/internal/providers"
 	"github.com/asszi/go-e-commerce-api/internal/server"
 	"github.com/asszi/go-e-commerce-api/internal/services"
 	"github.com/gin-gonic/gin"
@@ -41,8 +42,9 @@ func main() {
 	authService := services.NewAuthService(db, cfg)
 	productService := services.NewProductService(db)
 	userService := services.NewUserService(db)
+	uploadService := services.NewUploadService(providers.NewLocalUploadProvider(cfg.Upload.Path))
 
-	srv := server.New(cfg, db, &log, authService, productService, userService)
+	srv := server.New(cfg, db, &log, authService, productService, userService, uploadService)
 
 	router := srv.SetupRoutes()
 
