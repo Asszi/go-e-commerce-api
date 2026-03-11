@@ -12,6 +12,7 @@ import (
 
 	"github.com/asszi/go-e-commerce-api/internal/config"
 	"github.com/asszi/go-e-commerce-api/internal/database"
+	"github.com/asszi/go-e-commerce-api/internal/interfaces"
 	"github.com/asszi/go-e-commerce-api/internal/logger"
 	"github.com/asszi/go-e-commerce-api/internal/providers"
 	"github.com/asszi/go-e-commerce-api/internal/server"
@@ -42,7 +43,15 @@ func main() {
 	authService := services.NewAuthService(db, cfg)
 	productService := services.NewProductService(db)
 	userService := services.NewUserService(db)
-	uploadService := services.NewUploadService(providers.NewLocalUploadProvider(cfg.Upload.Path))
+
+	var uploadProvider interfaces.UploadProvider
+	if cfg.Upload.UploadProvider == "s3" {
+		uploadProvider = providers.NewS3Provider(cfg)
+	} else {
+		uploadProvider = providers.NewLocalUploadProvider(cfg.Upload.Path)
+	}
+
+	uploadService := services.NewUploadService(uploadProvider)
 
 	srv := server.New(cfg, db, &log, authService, productService, userService, uploadService)
 
